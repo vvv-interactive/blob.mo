@@ -4,7 +4,7 @@ Vessel package
 ## Install
 Assuming you have vessel package manager initialized.
 
-Edit your package-set.dhall and in additions array add this object
+1) Edit your package-set.dhall and in additions array add this object
 
     let additions = [
 
@@ -14,17 +14,25 @@ Edit your package-set.dhall and in additions array add this object
       , dependencies = ["base"]
       },
       
-  
+2) edit vessel.dhall and add new dependency "vvv" like so
 
-## textToBlob
-    import Blob_ "mo:vvv/Blob";
+        dependencies = [ "vvv","base" ...
+        
+ 3) run `vessel install`
+
+4) import it in your code with `import Blob_ "mo:vvv/Blob";`
+
+## Usage
+
+### textToBlob
+    
 
     let blo : Blob = Blob_.textToBlob("something 😇 special");
 
-## blobToText
+### blobToText
     let txt : Text = Blob_.blobToText(blo);
     
-## textToBlob ( create json blobs - the easy way )
+### textToBlob ( create json blobs - the easy way )
     let name: Text = "Jo";
     let age: Nat = 37;
     let json_blob : Blob =  Blob_.textToBlob("{\"name\":\" # name # \", \"age\":\" # Nat.toText( age ) # \"}");
