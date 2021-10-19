@@ -1,0 +1,86 @@
+<body style="background-color:#eee">
+<canvas id="canvas" style="image-rendering: crisp-edges;image-rendering: pixelated;zoom:5;position:absolute;background-color:#fff;top:50%;left:50%;"></canvas>
+<textarea id="ta" style="position:absolute;width:100%;left:10px;right:10px;top:70%;bottom:10px;background-color:#ddd;">....</textarea>
+<script>
+// Sorry for the bad javascript.. I wasn't in mood to make projects and use npm, so... I opened vim and wrote it for an hour past midnight. 
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width=16;
+canvas.height=16;
+ctx.imageSmoothingEnabled = false;
+ctx.mozImageSmoothingEnabled = false;
+
+var letter = function(font,le) {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	ctx.font = font;
+	ctx.fillText(le, 2, 12);
+
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	const data = imageData.data;
+	var na = [];
+	for (var i = 0; i < data.length; i += 4) {
+		let b = data[i+3] > 73 ? 255:0;
+		data[i + 3] = b;
+		na.push(b);
+	}
+	let rez = bitTo8(na);
+	ctx.putImageData(imageData, 0, 0);
+
+	// create img
+	var imgSrc = canvas.toDataURL("image/png");
+	var img = document.createElement('img');
+	img.src = imgSrc;
+	document.body.appendChild(img);
+	return rez;
+};
+
+function bitTo8(na) {
+	let n = 0;
+	let r = [];
+	for (let i=0; i<na.length; i++) {
+		let p = (i % 16); 
+		if (na[i] != 0) n = n | (1 << p);
+		if (p == 15) {
+			r.push(n);
+			n = 0;
+		}
+	}
+	return r;
+}
+
+let fonts = ['16px Trattatello','15px Chalkduster','15px Luminari','16px verdana','16px arial','16px serif'];
+
+async function go() {
+	let all = "qwetyuiopasdfghjkzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM123456789";
+	let rez = "";
+	rez += "// Motoko character map generator - made by *VVV Interactive* | infu#7720\n";
+	rez += "// "+all.length+" charaters per font\n";
+	rez += "// Order: " + all+"\n";
+	rez += "// " + fonts.length + " fonts\r\n";
+	rez += "// 16x16 pixels each character\n"
+
+	rez += 'public let chars: [Char] = ["' + all.split('').join('","') + '"];' + "\n"
+		rez += "\npublic let fonts : [Nat32] = [";
+	for (let j=0; j<fonts.length; j++){ 
+		for (let i=0; i<all.length; i++) {
+			await sleep(1);
+			let re = letter(fonts[j], all.charAt(i));
+			rez += ""+re.join(',')+",\n";
+		}
+	}
+	rez += "]";
+	document.getElementById('ta').value= rez;
+}
+go();
+function sleep(de) {
+	return new Promise((resolve,reject) => {
+			setTimeout(() => {
+					resolve();
+					},de);
+			});
+}
+</script>
+
