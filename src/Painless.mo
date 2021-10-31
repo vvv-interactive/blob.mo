@@ -30,7 +30,7 @@ module {
         content_encoding : Text;
     };
 
-    public type CallbackFunc = shared query Token -> async Callback;
+    public type CallbackFunc = shared () -> async ();
 
     public type StreamingStrategy = {
         #Callback : {
@@ -48,18 +48,27 @@ module {
 
     public type ChunkFunc = (Text, Nat) -> Chunk;
 
-    public func Request(request : Request, {chunkFunc:ChunkFunc; cbFunc: CallbackFunc}) :  Response {
+    public func NotFound(t:Text) : Response {
+            {
+                body               = Text.encodeUtf8("Not found " # t);
+                headers            = [];
+                streaming_strategy = null;
+                status_code        = 404;
+               }
+    };
+
+    public func Request(request : Request, {chunkFunc:ChunkFunc; cbFunc: CallbackFunc; headers: [HeaderField] }) :  Response {
 
         switch(chunkFunc(request.url, 0)) {
             case (#more(data)) {    // more chunks to follow
                 {
                 body               = data;
-                headers            = [];
+                headers            = headers;
                 streaming_strategy = ?#Callback({
                     token = {
                         key = request.url;
                         sha256 = null;
-                        index = 0;
+                        index = 1;
                         content_encoding = "";
                     };
                     callback = cbFunc;
@@ -70,18 +79,13 @@ module {
             case (#end(data)) {    // last chunk
                 {
                 body               = data;
-                headers            = [];
+                headers            = headers;
                 streaming_strategy = null;
                 status_code        = 200;
                }
             };
             case (#none()) {        // no chunks at all
-               {
-                body               = Text.encodeUtf8("Not found " # request.url);
-                headers            = [];
-                streaming_strategy = null;
-                status_code        = 404;
-               }
+               NotFound(request.url);
             }
         }
   
