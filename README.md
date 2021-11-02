@@ -9,7 +9,7 @@ Assuming you have vessel package manager initialized.
         let additions = [
         { name = "vvv"
         , repo = "https://github.com/vvv-interactive/vvv.mo"
-        , version = "v0.1.0"
+        , version = "v0.1.1"
         , dependencies = ["base"]
         },
       
